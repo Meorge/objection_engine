@@ -25,6 +25,7 @@ from .beans.scene import AnimScene
 from .beans.video import AnimVideo
 from .constants import Character, lag_frames, fps
 from . import constants
+from .scene_builders import add_objection_scene
 import re
 
 nlp = spacy.blank("xx")
@@ -297,30 +298,14 @@ def do_video(config: List[Dict], output_filename, resolution_scale):
 
             # Handle case of Objection bubble
             elif "action" in obj and obj["action"] == constants.Action.OBJECTION:
-                # Add the "Objection!" bubble on top of the current background and character
-                objection.shake_effect = True
-                character = default_character
-                scene_objs = list(
-                    filter(lambda x: x is not None, [bg, character, bench, objection])
-                )
-                scenes.append(AnimScene(scene_objs, 11, start_frame=current_frame))
-
-                # For a short period of time after the bubble disappears, continue to display
-                # the background and character(?)
-                bg.shake_effect = False
-                if bench is not None:
-                    bench.shake_effect = False
-                character.shake_effect = False
-                scene_objs = list(
-                    filter(lambda x: x is not None, [bg, character, bench])
-                )
-                scenes.append(AnimScene(scene_objs, 11, start_frame=current_frame))
-                sound_effects.append(
-                    {
-                        "_type": "objection",
-                        "character": current_character_name.lower(),
-                        "length": 22,
-                    }
+                add_objection_scene(
+                    default_character=default_character,
+                    bg=bg,
+                    bench=bench,
+                    current_character_name=current_character_name,
+                    current_frame=current_frame,
+                    scenes=scenes,
+                    sound_effects=sound_effects
                 )
                 current_frame += 11
 
