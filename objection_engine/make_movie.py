@@ -1,3 +1,4 @@
+from os import getenv
 from objection_engine.ace_attorney_scene import (
     AceAttorneyDirector,
     DialogueBoxBuilder,
@@ -17,6 +18,10 @@ from rich.progress import (
     TaskProgressColumn,
     TimeElapsedColumn,
 )
+
+from objection_engine.sentiment_analysis import SentimentAnalyzer
+from objection_engine.sentiment_analysis_hf import HuggingFaceAnalyzer
+from objection_engine.sentiment_analysis_pg import PolyglotAnalyzer
 
 
 def render_comment_list(
@@ -120,7 +125,18 @@ def render_comment_list(
             "on_ffmpeg_finished": on_ffmpeg_finished,
         }
 
-        builder = DialogueBoxBuilder(callbacks=callbacks)
+        # Determine sentiment analyzer based on environment variables
+        sentiment_analyzer = SentimentAnalyzer()
+        if len(getenv("oe_bypass_sentiment", "")) <= 0:
+            model_setting = getenv("oe_sentiment_model", "hf")
+            if model_setting == "hf":
+                sentiment_analyzer = HuggingFaceAnalyzer()
+            elif model_setting == "pg":
+                sentiment_analyzer = PolyglotAnalyzer()
+
+        builder = DialogueBoxBuilder(
+            callbacks=callbacks, sentiment_analyzer=sentiment_analyzer
+        )
         builder.render(
             comment_list,
             output_filename=output_filename,
@@ -128,5 +144,5 @@ def render_comment_list(
             assigned_characters=assigned_characters,
             adult_mode=adult_mode,
             avoid_spoiler_sprites=avoid_spoiler_sprites,
-            resolution_scale=resolution_scale
+            resolution_scale=resolution_scale,
         )
