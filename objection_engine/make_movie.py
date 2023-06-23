@@ -23,6 +23,7 @@ from objection_engine.sentiment_analysis import SentimentAnalyzer
 from objection_engine.sentiment_analysis_hf import HuggingFaceAnalyzer
 from objection_engine.sentiment_analysis_pg import PolyglotAnalyzer
 
+from objection_engine.utils import ensure_assets_are_available
 
 def render_comment_list(
     comment_list: list["Comment"],
@@ -34,6 +35,7 @@ def render_comment_list(
     avoid_spoiler_sprites: bool = False,
 ):
     print("EDITTT")
+    ensure_assets_are_available()
     with Progress(
         TextColumn("[progress.description]{task.description}"),
         BarColumn(),
