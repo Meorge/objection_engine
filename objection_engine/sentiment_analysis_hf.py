@@ -18,5 +18,4 @@ class HuggingFaceAnalyzer(SentimentAnalyzer):
 
     def get_sentiment(self, text: str):
         result = self.__analyzer(text)[0]
-        print(f'Hugging Face analyzer for "{text}": {result}')
         return result
