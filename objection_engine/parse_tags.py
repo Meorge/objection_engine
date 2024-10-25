@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 from re import compile
 from copy import deepcopy
-from objection_engine.font_tools import get_best_font, split_str_into_newlines, split_with_joined_sentences, get_text_width
-from .font_constants import FONT_ARRAY
 
 @dataclass
 class DialogueTag:
@@ -149,35 +147,6 @@ class DialogueTextContent:
     cleaned_lines: str
     tags: list[DialogueTag]
     actions: list[DialogueAction]
-
-    def get_text_chunks(self) -> list[DialoguePage]:
-        pages = []
-        current_position = 0
-        for box_text in split_with_joined_sentences(self.cleaned_lines):
-            splitter_font_path = get_best_font(box_text, FONT_ARRAY)['path']
-            wrapped_box_lines = split_str_into_newlines(box_text, splitter_font_path, 15).split('\n')
-            chunks: list[list[DialogueTextChunk]] = []
-
-            for line in wrapped_box_lines:
-                for char in line:
-                    # print(f"Processing char {char} at position {current_position}")
-                    # First, process actions
-                    for action in [a for a in self.actions if a.index == current_position]:
-                        # print(f"Action {action} takes place at this position, so insert it")
-                        chunks.append(action)
-
-                    this_char_tags: list[str] = []
-                    for tag in self.tags:
-                        if current_position in tag.range():
-                            this_char_tags.append(tag.name)
-                    chunks.append(DialogueTextChunk(char, this_char_tags))
-                    current_position += 1
-
-                chunks.append(DialogueTextLineBreak())
-            new_page = DialoguePage(chunks).condense_chunks()
-            pages.append(new_page)
-            
-        return pages
 
 __tag_matcher = compile(r"\[(.*?)\]")
 def parse_line(text: str) -> DialoguePage:

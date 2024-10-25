@@ -1,11 +1,6 @@
-from .font_constants import FONT_ARRAY
+from objection_engine.font_constants import FONT_ARRAY
 from PIL import ImageFont
-from typing import List, Dict, Union
-from textwrap import wrap
-import spacy
-
-nlp = spacy.blank("xx")
-nlp.add_pipe('sentencizer')
+from typing import Union
 
 try:
     from fontTools.ttLib import TTFont
@@ -66,27 +61,3 @@ def split_str_into_newlines(text: str, font_path, font_size):
     font = ImageFont.truetype(font_path, font_size)
     words = text.split(" ")
     return fit_words_within_width(words, font, True)
-
-
-def split_with_joined_sentences(text: str):
-    """
-    """
-    tokens = nlp(text)
-    sentences = [sent.text.strip() for sent in tokens.sents]
-    joined_sentences = []
-    i = 0
-    while i < len(sentences):
-        sentence = sentences[i]
-        if len(sentence) > 85: # Long sentences should be wrapped to multiple shorter lines
-            text_chunks = [chunk for chunk in wrap(sentence, 85)]
-            joined_sentences = [*joined_sentences, *text_chunks]
-            i += 1
-        else:
-            if i + 1 < len(sentences) and len(f"{sentence} {sentences[i+1]}") <= 85: # Maybe we can join two different sentences
-                joined_sentences.append(sentence + " " + sentences[i+1])
-                i += 2
-            else:
-                joined_sentences.append(sentence)
-                i += 1
-
-    return joined_sentences
